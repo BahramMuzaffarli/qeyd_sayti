@@ -13,14 +13,16 @@
 
         <nav style="margin-top:8px; display:flex; flex-direction:column; gap:8px;">
             <div>
-                <a href="{% url 'welcome' %}" style="display:block; padding:10px 12px; border-radius:8px; color:#e8f6ff; font-weight:700; text-decoration:none;">Müştərilər</a>
-                <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px; padding-left:6px;">
+                <!-- Customers toggle (acts like Administrator) -->
+                <a href="#" id="customersToggleLink" style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:8px; color:#e8f6ff; font-weight:700; text-decoration:none; background:transparent">Müştərilər</a>
+                <div id="customersMenu" style="display:none; margin-top:8px; display:flex; flex-direction:column; gap:6px; padding-left:6px;">
                     <a href="{% url 'welcome' %}" style="padding:8px 10px; border-radius:8px; color:#dbeeff; text-decoration:none; background:transparent">Yaradılan qeydlər</a>
                 </div>
             </div>
 
             <div>
-                <a href="#" id="adminToggleLink" style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:8px; color:#eaf6ff; text-decoration:none; font-weight:700; background:transparent">Administrator <span style="color:#dbeeff">▾</span></a>
+                <!-- Administrator section: keep toggle behavior but remove the triangle for a cleaner look -->
+                <a href="#" id="adminToggleLink" style="display:flex; align-items:center; padding:10px 12px; border-radius:8px; color:#eaf6ff; text-decoration:none; font-weight:700; background:transparent">Administrator</a>
                 <div id="adminMenu" style="display:none; margin-top:8px; display:flex; flex-direction:column; gap:6px; padding-left:6px;">
                     <a href="{% url 'users_list' %}" style="padding:8px 10px; border-radius:8px; color:#dbeeff; text-decoration:none;">Userlər</a>
                 </div>
@@ -36,8 +38,9 @@
 
 <style>
     /* main content shifts to make room for the fixed sidebar */
-    .main-with-sidebar { margin-left: 280px; width: calc(100% - 300px); padding: 18px 20px; box-sizing: border-box; }
-    .main-with-sidebar .box { max-width: none; width:100%; }
+    /* Make main area span full height so notes table fills page */
+    .main-with-sidebar { margin-left: 280px; width: calc(100% - 300px); padding: 18px 20px; box-sizing: border-box; min-height: 100vh; }
+    .main-with-sidebar .box { max-width: none; width:100%; min-height: calc(100vh - 140px); display:flex; flex-direction:column; }
     @media (max-width:900px){
         #qeyd-sidebar{ position:relative; width:100%; height:auto; box-shadow:none; border-right:none }
         .main-with-sidebar{ margin-left:0; width:100%; padding:12px }

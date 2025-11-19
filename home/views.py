@@ -4,6 +4,8 @@ from .models import Note
 from django.db.utils import OperationalError
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 
 # Simple session-based translations (not using Django i18n)
 TRANSLATIONS = {
@@ -343,3 +345,23 @@ def delete_user(request, id):
         pass
     user.delete()
     return redirect('users_list')
+
+
+@login_required
+def profile(request):
+    lang = request.session.get('lang', 'aze')
+    t = get_translations(lang)
+    user = request.user
+    message = None
+    if request.method == 'POST':
+        form = PasswordChangeForm(user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # important to keep the user logged in
+            message = 'Parol dəyişdirildi.'
+        else:
+            message = 'Xəta: zəhmət olmasa formu düzgün doldurun.'
+    else:
+        form = PasswordChangeForm(user)
+
+    return render(request, 'home/profile.html', {'user_obj': user, 'form': form, 'message': message, 'lang': lang, 't': t})

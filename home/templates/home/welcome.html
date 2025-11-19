@@ -77,7 +77,18 @@
                 </div>
 
                 <a href="{% url 'create_note' %}" class="btn">{{ t.create }}</a>
-                <a href="{% url 'logout' %}" class="btn secondary">{{ t.logout }}</a>
+                <!-- User dropdown: Profile and Logout (press to open) -->
+                <div style="position:relative;">
+                    <button id="userBtn" class="btn secondary" type="button" style="display:flex; align-items:center; gap:8px;">
+                        <span style="display:inline-block; width:28px; height:28px; border-radius:50%; background:#fff; color:#044f8a; font-weight:700; display:flex; align-items:center; justify-content:center;">{{ username|default:'Q'|slice:":1"|upper }}</span>
+                        <span style="font-size:13px">{{ username }}</span>
+                        <span style="font-size:12px; margin-left:6px;">▾</span>
+                    </button>
+                    <div id="userMenu" style="display:none; position:absolute; right:0; top:46px; background:#fff; color:#000; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.12); overflow:hidden; min-width:160px; z-index:60;">
+                        <a href="{% url 'profile' %}" style="display:block; padding:10px; text-decoration:none; color:#333">Profil</a>
+                        <a href="{% url 'logout' %}" style="display:block; padding:10px; text-decoration:none; color:#333">{{ t.logout }}</a>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -280,6 +291,18 @@ python manage.py migrate</pre>
                         window.location.href = '/lang/' + target + '/?next=' + next;
                     });
                 });
+
+                // user dropdown handling
+                const userBtn = document.getElementById('userBtn');
+                const userMenu = document.getElementById('userMenu');
+                if(userBtn){
+                    userBtn.addEventListener('click', function(e){
+                        e.stopPropagation();
+                        userMenu.style.display = (userMenu.style.display === 'flex') ? 'none' : 'flex';
+                        userMenu.style.flexDirection = 'column';
+                    });
+                }
+                document.addEventListener('click', function(){ if(userMenu) userMenu.style.display = 'none'; });
             });
         </script>
     </div>

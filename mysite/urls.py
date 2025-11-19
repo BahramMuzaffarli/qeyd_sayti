@@ -8,6 +8,7 @@ urlpatterns = [
     path("index/", views.index, name="index"),      # Salam Bahram səhifəsi
     path("welcome/", views.welcome, name="welcome"),  # welcome səhifəsi
     path("logout/", views.logout_view, name="logout"),
+    path("profile/", views.profile, name="profile"),
     path("note/<int:id>/edit/", views.edit_note, name="edit_note"),
     path("note/create/", views.create_note, name="create_note"),
     path("lang/<str:lang>/", views.change_language, name="change_language"),

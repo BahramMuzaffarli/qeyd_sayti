@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profil - QeydLab</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { background:#f5f6f8; font-family:Arial, sans-serif; margin:0 }
+        .main-with-sidebar { margin-left:280px; padding:18px 20px; }
+        .box { background:#fff; padding:20px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.08) }
+        label{ display:block; margin-top:8px; color:#666 }
+        input{ padding:8px; width:100%; border-radius:6px; border:1px solid #ccc }
+        .btn{ background:#007BFF; color:#fff; padding:8px 12px; border-radius:8px; border:none; cursor:pointer; margin-top:10px }
+    </style>
+    <link rel="icon" href="data:image/svg+xml;utf8,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'><rect%20x='2'%20y='3'%20width='14'%20height='18'%20rx='2'%20fill='%23044f8a'/><path%20d='M16.5%203.5l4%204L10%2018l-4%201%201-4%2010.5-11.5z'%20fill='%23fff'/></svg>">
+</head>
+<body>
+    {% include 'home/sidebar.html' %}
+    <div class="main-with-sidebar">
+        <div class="box">
+            <h2>Profil</h2>
+            <div><strong>İstifadəçi:</strong> {{ user_obj.username }}</div>
+            <div style="margin-top:8px"><strong>Email:</strong> {{ user_obj.email|default:'-' }}</div>
+
+            <hr style="margin:14px 0">
+            <h3>Şifrəni dəyiş</h3>
+            {% if message %}
+                <div style="background:#e6ffed; padding:8px; border-radius:6px; color:#114b22">{{ message }}</div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                {{ form.old_password.label_tag }}
+                {{ form.old_password }}
+                {{ form.new_password1.label_tag }}
+                {{ form.new_password1 }}
+                {{ form.new_password2.label_tag }}
+                {{ form.new_password2 }}
+                <button class="btn" type="submit">Şifrəni dəyiş</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
