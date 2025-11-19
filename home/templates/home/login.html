@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
+    <title>QeydLab</title>
+    {% load static %}
     <style>
         body {
             background-color: #87CEFA; /* Açıq mavi */
@@ -20,6 +21,12 @@
             text-align: center;
             box-shadow: 0px 0px 10px #888;
         }
+
+        .logo {
+            display:flex; flex-direction:column; align-items:center; gap:8px; margin-bottom:8px;
+        }
+        .logo img{ width:96px; height:96px; object-fit:contain }
+        .logo-text{ font-weight:700; color:#004080; font-size:20px }
 
         input {
             width: 90%;
@@ -45,13 +52,14 @@
 </head>
 <body>
     <div class="box">
-        <h2>Sayta giriş</h2>
+        <h2 style="margin:0; padding-bottom:8px; color:#004080">QeydLab</h2>
+        <h3 style="margin:0; margin-top:6px">{{ t.login_title }}</h3>
 
-        <form method="POST">
+        <form method="POST" style="margin-top:14px">
             {% csrf_token %}
-            <input type="text" name="username" placeholder="İstifadəçi adı" required><br>
-            <input type="password" name="password" placeholder="Şifrə" required><br>
-            <button type="submit">Daxil ol</button>
+            <input type="text" name="username" placeholder="{{ t.username_placeholder }}" required><br>
+            <input type="password" name="password" placeholder="{{ t.password_placeholder }}" required><br>
+            <button type="submit">{{ t.login_button }}</button>
         </form>
     </div>
 </body>
