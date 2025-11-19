@@ -55,6 +55,15 @@
         <h2 style="margin:0; padding-bottom:8px; color:#004080">QeydLab</h2>
         <h3 style="margin:0; margin-top:6px">{{ t.login_title }}</h3>
 
+        {% if error %}
+        <div id="login-notice" style="position:fixed; right:18px; top:18px; background:#ffcdd2; color:#b71c1c; padding:10px 14px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.08); z-index:999">{{ error }}</div>
+        <script>
+            setTimeout(function(){
+                var n = document.getElementById('login-notice'); if(n) n.style.display='none';
+            }, 5000);
+        </script>
+        {% endif %}
+
         <form method="POST" style="margin-top:14px">
             {% csrf_token %}
             <input type="text" name="username" placeholder="{{ t.username_placeholder }}" required><br>

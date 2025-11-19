@@ -6,9 +6,12 @@
         </a>
 
         <nav style="margin-top:6px;">
-            <div style="margin-top:8px; font-size:13px; color:#777; font-weight:700;">Müştərilər</div>
+            <div style="margin-top:8px; font-size:13px; color:#777; font-weight:700;">
+                <a href="{% url 'welcome' %}" style="text-decoration:none; color:inherit;">Müştərilər</a>
+            </div>
             <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
-                <a href="{% url 'users_list' %}" style="padding:8px 10px; border-radius:8px; color:#007BFF; text-decoration:none;">Userlər</a>
+                <a href="{% url 'welcome' %}" style="padding:8px 10px; border-radius:8px; color:#007BFF; text-decoration:none;">Yaradılan qeydlər</a>
+                <a href="{% url 'create_user' %}" style="padding:8px 10px; border-radius:8px; color:#007BFF; text-decoration:none;">Yeni user</a>
             </div>
 
             <div style="margin-top:14px; font-size:13px; color:#777; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
@@ -17,7 +20,6 @@
             </div>
             <div id="adminMenu" style="display:none; margin-top:8px; display:flex; flex-direction:column; gap:6px;">
                 <a href="{% url 'users_list' %}" style="padding:8px 10px; border-radius:8px; color:#007BFF; text-decoration:none;">Userlər</a>
-                <a href="{% url 'create_user' %}" style="padding:8px 10px; border-radius:8px; color:#007BFF; text-decoration:none;">Yeni user</a>
             </div>
         </nav>
 

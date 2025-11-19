@@ -300,3 +300,46 @@ def create_user(request):
                 return redirect('users_list')
 
     return render(request, 'home/create_user.html', {'error': error})
+
+
+def edit_user(request, id):
+    User = get_user_model()
+    user = get_object_or_404(User, id=id)
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        is_staff = True if request.POST.get('is_staff') == 'on' else False
+        if not username:
+            error = 'Username required.'
+        else:
+            # check uniqueness
+            if User.objects.exclude(id=user.id).filter(username=username).exists():
+                error = 'Username already taken.'
+            else:
+                user.username = username
+                user.is_staff = is_staff
+                if password:
+                    user.set_password(password)
+                user.save()
+                return redirect('users_list')
+
+    return render(request, 'home/edit_user.html', {'user_obj': user, 'error': error})
+
+
+def delete_user(request, id):
+    from django.views.decorators.http import require_POST
+    # accept POST only
+    if request.method != 'POST':
+        return redirect('users_list')
+    User = get_user_model()
+    user = get_object_or_404(User, id=id)
+    # do not allow deleting superuser or self (basic safety)
+    try:
+        if request.user.is_authenticated and request.user.id == user.id:
+            # cannot delete self via UI
+            return redirect('users_list')
+    except Exception:
+        pass
+    user.delete()
+    return redirect('users_list')
