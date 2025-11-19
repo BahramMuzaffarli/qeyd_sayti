@@ -39,8 +39,9 @@
         h1 { margin:0; font-size:20px; color:#004080 }
         .controls { display:flex; gap:10px; align-items:center }
         select, input[type="text"] { padding:8px 10px; border-radius:8px; border:1px solid #ccc }
-        .btn { background:var(--primary); color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer }
-        .btn.secondary { background:#6c757d }
+    /* Buttons: anchors and buttons should look consistent and not be underlined */
+    .btn { background:var(--primary); color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:8px }
+    .btn.secondary { background:#6c757d; text-decoration:none }
         table { width:100%; border-collapse:collapse; margin-top:12px }
         th, td { padding:12px; border-bottom:1px solid #eee; text-align:left }
         th { color:var(--muted); font-weight:600; }

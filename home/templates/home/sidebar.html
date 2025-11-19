@@ -37,10 +37,9 @@
 </aside>
 
 <style>
-    /* main content shifts to make room for the fixed sidebar */
-    /* Make main area span full height so notes table fills page */
-    .main-with-sidebar { margin-left: 280px; width: calc(100% - 300px); padding: 18px 20px; box-sizing: border-box; min-height: 100vh; }
-    .main-with-sidebar .box { max-width: none; width:100%; min-height: calc(100vh - 140px); display:flex; flex-direction:column; }
+    /* main content shifts to make room for the fixed sidebar (restored to original compact behavior) */
+    .main-with-sidebar { margin-left: 280px; width: calc(100% - 300px); padding: 18px 20px; box-sizing: border-box; }
+    .main-with-sidebar .box { max-width: none; width:100%; }
     @media (max-width:900px){
         #qeyd-sidebar{ position:relative; width:100%; height:auto; box-shadow:none; border-right:none }
         .main-with-sidebar{ margin-left:0; width:100%; padding:12px }
@@ -55,6 +54,16 @@
             toggleLink.addEventListener('click', function(e){
                 e.preventDefault();
                 menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
+            });
+        }
+
+        // customers toggle (Müştərilər -> Yaradılan qeydlər)
+        const customersToggle = document.getElementById('customersToggleLink');
+        const customersMenu = document.getElementById('customersMenu');
+        if(customersToggle && customersMenu){
+            customersToggle.addEventListener('click', function(e){
+                e.preventDefault();
+                customersMenu.style.display = (customersMenu.style.display === 'flex') ? 'none' : 'flex';
             });
         }
     });
