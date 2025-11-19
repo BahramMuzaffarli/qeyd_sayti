@@ -1,7 +1,13 @@
 <aside id="qeyd-sidebar" style="position:fixed; left:0; top:0; bottom:0; width:260px; background:linear-gradient(180deg,#044f8a,#033a66); border-right:1px solid rgba(0,0,0,0.06); padding:20px; box-shadow:2px 0 18px rgba(2,24,47,0.12); z-index:60; overflow:auto;">
     <div style="display:flex; flex-direction:column; gap:16px; height:100%;">
         <a href="{% url 'welcome' %}" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:12px;">
-            <div style="width:44px; height:44px; border-radius:10px; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-weight:800; color:#ffffff; font-size:16px">QL</div>
+            <!-- Inline SVG note icon (used as logo). If you later add a static file at /static/home/note-icon.svg the browser will use it as favicon via head link. -->
+            <div style="width:44px; height:44px; border-radius:10px; background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center;">
+                <svg width="28" height="28" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <rect x="2" y="3" width="14" height="18" rx="2" fill="#044f8a" />
+                    <path d="M16.5 3.5l4 4L10 18l-4 1 1-4L16.5 3.5z" fill="#ffffff" />
+                </svg>
+            </div>
             <div style="font-weight:900; color:#ffffff; font-size:18px; letter-spacing:0.2px">QeydLab</div>
         </a>
 
