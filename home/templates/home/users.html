@@ -1,63 +1,68 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>QeydLab — Users</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-    /* make user pages use site light-gray background */
-    body{ background:#f5f6f8; font-family:Arial; padding:30px }
-        .container{ display:flex; gap:18px; max-width:1000px; margin:0 auto }
-        .box{ background:#fff; padding:16px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06); width:100% }
-        table{ width:100%; border-collapse:collapse }
-        th,td{ padding:10px; border-bottom:1px solid #eee; text-align:left }
-        .btn{ background:#007BFF; color:#fff; padding:8px 12px; border-radius:8px; text-decoration:none }
-    </style>
-</head>
-<body>
+{% extends 'home/base.html' %}
+
+{% block title %}İstifadəçilər{% endblock %}
+
+{% block content %}
+<div class="main-with-sidebar">
+
+    <!-- Sidebar saxlanılır -->
     {% include 'home/sidebar.html' %}
-    <div class="main-with-sidebar">
-        <div class="box">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2 style="margin:0">Userlər</h2>
-                <a href="{% url 'create_user' %}" class="btn">Yeni user</a>
-            </div>
-            <table style="margin-top:12px">
-                <thead>
-                    <tr><th>ID</th><th>Username</th><th>is_staff</th><th>is_active</th><th>Actions</th></tr>
-                </thead>
-                <tbody>
-                    {% for u in users %}
-                        <tr>
-                            <td>{{ u.id }}</td>
-                            <td>{{ u.username }}</td>
-                            <td>{{ u.is_staff }}</td>
-                            <td>{{ u.is_active }}</td>
-                            <td>
-                                <a href="{% url 'edit_user' u.id %}" class="btn" style="background:#28a745;">Edit</a>
-                                <a href="{% url 'delete_user' u.id %}" class="btn user-delete" style="background:#dc3545; margin-left:6px;">Delete</a>
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr><td colspan="5">Heç bir user yoxdur</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <form id="user-delete-form" method="POST" style="display:none">{% csrf_token %}</form>
-            <script>
-                document.addEventListener('DOMContentLoaded', function(){
-                    const links = document.querySelectorAll('.user-delete');
-                    const form = document.getElementById('user-delete-form');
-                    links.forEach(function(a){
-                        a.addEventListener('click', function(e){
-                            e.preventDefault();
-                            if(!confirm('Silmək istədiyinizə əminsiniz?')) return;
-                            form.setAttribute('action', a.getAttribute('href'));
-                            form.submit();
-                        });
-                    });
-                });
-            </script>
+
+    <!-- Əvvəlki dizayn edən BOX hissəsi -->
+    <div class="box">
+        <div class="title-row">
+            <h2>Userlər</h2>
+            <a href="{% url 'create_user' %}" class="btn btn-success">Yeni user</a>
         </div>
+
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Staff?</th>
+                    <th>Active?</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td>{{ u.id }}</td>
+                    <td>{{ u.username }}</td>
+                    <td>{{ u.is_staff }}</td>
+                    <td>{{ u.is_active }}</td>
+                    <td>
+                        <a href="{% url 'edit_user' u.id %}" class="btn btn-success">Edit</a>
+                        <a href="{% url 'delete_user' u.id %}" class="btn btn-danger user-delete">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5">Heç bir user yoxdur</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Delete üçün gizli form -->
+        <form id="user-delete-form" method="POST" style="display:none;">
+            {% csrf_token %}
+        </form>
     </div>
-</body>
-</html>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const links = document.querySelectorAll('.user-delete');
+    const form = document.getElementById('user-delete-form');
+
+    links.forEach(function(a) {
+        a.addEventListener('click', function(e) {
+            e.preventDefault();
+            if(!confirm("Silmək istədiyinizə əminsiniz?")) return;
+            form.action = a.getAttribute("href");
+            form.submit();
+        });
+    });
+});
+</script>
+{% endblock %}
