@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QeydLab — Users</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body{ background:#f0f8ff; font-family:Arial; padding:30px }
+        .container{ display:flex; gap:18px; max-width:1000px; margin:0 auto }
+        .box{ background:#fff; padding:16px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06); width:100% }
+        table{ width:100%; border-collapse:collapse }
+        th,td{ padding:10px; border-bottom:1px solid #eee; text-align:left }
+        .btn{ background:#007BFF; color:#fff; padding:8px 12px; border-radius:8px; text-decoration:none }
+    </style>
+</head>
+<body>
+    {% include 'home/sidebar.html' %}
+    <div class="main-with-sidebar">
+        <div class="box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0">Userlər</h2>
+                <a href="{% url 'create_user' %}" class="btn">Yeni user</a>
+            </div>
+            <table style="margin-top:12px">
+                <thead>
+                    <tr><th>ID</th><th>Username</th><th>is_staff</th><th>is_active</th></tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                        <tr>
+                            <td>{{ u.id }}</td>
+                            <td>{{ u.username }}</td>
+                            <td>{{ u.is_staff }}</td>
+                            <td>{{ u.is_active }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4">Heç bir user yoxdur</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,7 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from .models import Note
 from django.db.utils import OperationalError
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
+from django.contrib.auth.decorators import login_required
 
 # Simple session-based translations (not using Django i18n)
 TRANSLATIONS = {
@@ -105,14 +107,21 @@ def index(request):
 
 # Login səhifəsi
 def login_page(request):
+    error = None
     if request.method == "POST":
         username = request.POST.get("username")
-        # username-i session-a yazırıq ki, welcome səhifəsində istifadə edək
-        request.session['username'] = username
-        return redirect('welcome')  # login sonrası welcome səhifəsinə yönləndir
+        password = request.POST.get("password")
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            auth_login(request, user)
+            request.session['username'] = username
+            return redirect('welcome')
+        else:
+            error = 'Invalid credentials'  # simple message; translated later if needed
+
     lang = request.session.get('lang', 'aze')
     t = get_translations(lang)
-    return render(request, "home/login.html", {'lang': lang, 't': t})
+    return render(request, "home/login.html", {'lang': lang, 't': t, 'error': error})
 
 # Welcome səhifəsi – username və notes table göstərir
 def welcome(request):
@@ -267,3 +276,27 @@ def create_note(request):
             return redirect('welcome')
 
     return render(request, "home/create_note.html", {'lang': lang, 't': t})
+
+
+def users_list(request):
+    User = get_user_model()
+    users = User.objects.all().order_by('id')
+    return render(request, 'home/users.html', {'users': users})
+
+
+def create_user(request):
+    User = get_user_model()
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        if not username or not password:
+            error = 'Username and password are required.'
+        else:
+            if User.objects.filter(username=username).exists():
+                error = 'Username already exists.'
+            else:
+                User.objects.create_user(username=username, password=password)
+                return redirect('users_list')
+
+    return render(request, 'home/create_user.html', {'error': error})

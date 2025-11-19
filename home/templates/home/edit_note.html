@@ -13,7 +13,9 @@
     </style>
 </head>
 <body>
-    <div class="box">
+    {% include 'home/sidebar.html' %}
+    <div class="main-with-sidebar">
+        <div class="box">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <h2 style="margin:0">{{ t.edit_title }}</h2>
             <div style="display:flex; gap:8px; align-items:center;">
@@ -47,18 +49,19 @@
                 <a href="{% url 'welcome' %}" class="back-link">{{ t.back }}</a>
             </div>
         </form>
+        </div>
     </div>
+    <script>
+        // language dropdown for edit page
+        document.addEventListener('DOMContentLoaded', function(){
+            const btn = document.getElementById('langBtnEdit');
+            const menu = document.getElementById('langMenuEdit');
+            const items = document.querySelectorAll('.lang-item-edit');
+            if(!btn) return;
+            btn.addEventListener('click', function(e){ e.stopPropagation(); menu.style.display = (menu.style.display==='flex')? 'none':'flex'; menu.style.flexDirection='column'; });
+            document.addEventListener('click', function(){ if(menu) menu.style.display = 'none'; });
+            items.forEach(function(b){ b.addEventListener('click', function(){ const target=b.getAttribute('data-lang'); const next=encodeURIComponent(window.location.href); window.location.href = '/lang/'+target+'/?next='+next; }); });
+        });
+    </script>
 </body>
 </html>
-<script>
-    // language dropdown for edit page
-    document.addEventListener('DOMContentLoaded', function(){
-        const btn = document.getElementById('langBtnEdit');
-        const menu = document.getElementById('langMenuEdit');
-        const items = document.querySelectorAll('.lang-item-edit');
-        if(!btn) return;
-        btn.addEventListener('click', function(e){ e.stopPropagation(); menu.style.display = (menu.style.display==='flex')? 'none':'flex'; menu.style.flexDirection='column'; });
-        document.addEventListener('click', function(){ if(menu) menu.style.display = 'none'; });
-        items.forEach(function(b){ b.addEventListener('click', function(){ const target=b.getAttribute('data-lang'); const next=encodeURIComponent(window.location.href); window.location.href = '/lang/'+target+'/?next='+next; }); });
-    });
-</script>

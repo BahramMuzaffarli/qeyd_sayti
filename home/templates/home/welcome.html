@@ -52,8 +52,11 @@
     </style>
 </head>
 <body>
+    <div style="display:flex; gap:18px; width:100%;">
+    {% include 'home/sidebar.html' %}
+    <div class="main-with-sidebar">
     <div class="box">
-        <div class="header">
+    <div class="header">
             <h1>{{ t.welcome }} {{ username }}!</h1>
             <div class="controls">
                 <!-- single dropdown language selector -->
@@ -85,6 +88,15 @@
             <button type="submit" class="btn">{{ t.search }}</button>
             <a href="{% url 'welcome' %}" class="btn secondary" style="padding:8px 10px; text-decoration:none;">{{ t.clear }}</a>
         </form>
+
+        {% if db_error %}
+            <div style="background:#fff3f3; color:#8a1f1f; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #f5c6cb">
+                <strong>Database error:</strong> {{ db_error }}
+                <div style="margin-top:8px">Bu səhifəni işlətmək üçün aşağıdakı əmrləri yerinə yetirin (layihə kökündə):</div>
+                <pre style="background:#fff; padding:8px; border-radius:6px; margin-top:8px">python manage.py makemigrations home
+python manage.py migrate</pre>
+            </div>
+        {% endif %}
 
         <table>
             <thead>
@@ -148,15 +160,7 @@
             <div style="display:flex; gap:12px; align-items:center;">
                 <div>
                     <label style="color:var(--muted); font-size:13px; margin-right:6px">Səhifə:</label>
-
-            {% if db_error %}
-                <div style="background:#fff3f3; color:#8a1f1f; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #f5c6cb">
-                    <strong>Database error:</strong> {{ db_error }}
-                    <div style="margin-top:8px">Bu səhifəni işlətmək üçün aşağıdakı əmrləri yerinə yetirin (layihə kökündə):</div>
-                    <pre style="background:#fff; padding:8px; border-radius:6px; margin-top:8px">python manage.py makemigrations home
-                    <input id="pageInput" type="number" min="1" max="{{ paginator.num_pages }}" value="{{ page_obj.number }}" style="width:64px; padding:6px 8px; border-radius:6px; border:1px solid #ccc">
-                </div>
-            {% endif %}
+                    <input id="pageInput" type="number" min="1" max="{{ paginator.num_pages }}" value="{% if page_obj %}{{ page_obj.number }}{% else %}1{% endif %}" style="width:64px; padding:6px 8px; border-radius:6px; border:1px solid #ccc">
                     <button id="goPage" class="btn" style="padding:6px 10px;">Get</button>
                 </div>
 
@@ -273,6 +277,8 @@
                 });
             });
         </script>
+    </div>
+    </div>
     </div>
 </body>
 </html>

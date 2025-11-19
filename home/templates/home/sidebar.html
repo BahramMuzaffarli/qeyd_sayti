@@ -1,0 +1,47 @@
+<aside id="qeyd-sidebar" style="position:fixed; left:0; top:0; bottom:0; width:240px; background:#fff; border-right:1px solid #e6eefb; padding:18px; box-shadow:2px 0 12px rgba(0,0,0,0.04); z-index:60; overflow:auto;">
+    <div style="display:flex; flex-direction:column; gap:12px;">
+        <a href="{% url 'welcome' %}" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:10px;">
+            <div style="width:40px; height:40px; border-radius:8px; background:#e9f5ff; display:flex; align-items:center; justify-content:center; font-weight:700; color:#004080">QL</div>
+            <div style="font-weight:800; color:#004080; font-size:18px">QeydLab</div>
+        </a>
+
+        <nav style="margin-top:6px;">
+            <div style="margin-top:8px; font-size:13px; color:#777; font-weight:700;">Müştərilər</div>
+            <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
+                <a href="{% url 'users_list' %}" style="padding:8px 10px; border-radius:8px; color:#007BFF; text-decoration:none;">Userlər</a>
+            </div>
+
+            <div style="margin-top:14px; font-size:13px; color:#777; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
+                <div>Administrator</div>
+                <button id="adminToggle" style="background:transparent;border:none;cursor:pointer;color:#007BFF;font-weight:700">▾</button>
+            </div>
+            <div id="adminMenu" style="display:none; margin-top:8px; display:flex; flex-direction:column; gap:6px;">
+                <a href="{% url 'users_list' %}" style="padding:8px 10px; border-radius:8px; color:#007BFF; text-decoration:none;">Userlər</a>
+                <a href="{% url 'create_user' %}" style="padding:8px 10px; border-radius:8px; color:#007BFF; text-decoration:none;">Yeni user</a>
+            </div>
+        </nav>
+
+        <div style="margin-top:auto; font-size:12px; color:#888">Logged as: {{ request.user.username|default:request.session.username|default:'Qonaq' }}</div>
+    </div>
+</aside>
+
+<style>
+    /* shift main content when sidebar present */
+    .main-with-sidebar { margin-left: 260px; max-width: calc(100% - 280px); }
+    @media (max-width:800px){
+        #qeyd-sidebar{ position:relative; width:100%; height:auto; box-shadow:none; border-right:none }
+        .main-with-sidebar{ margin-left:0; max-width:100% }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        const toggle = document.getElementById('adminToggle');
+        const menu = document.getElementById('adminMenu');
+        if(toggle && menu){
+            toggle.addEventListener('click', function(){
+                if(menu.style.display === 'flex') menu.style.display = 'none'; else menu.style.display = 'flex';
+            });
+        }
+    });
+</script>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QeydLab — Yeni user</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body{ background:#f0f8ff; font-family:Arial; padding:30px }
+        .container{ display:flex; gap:18px; max-width:1000px; margin:0 auto }
+        .box{ background:#fff; padding:16px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.06); width:100% }
+        input{ padding:8px; width:100%; border:1px solid #ccc; border-radius:8px }
+        .btn{ background:#007BFF; color:#fff; padding:8px 12px; border-radius:8px; border:none }
+    </style>
+</head>
+<body>
+    {% include 'home/sidebar.html' %}
+    <div class="main-with-sidebar">
+        <div class="box">
+            <h2>Yeni user yarat</h2>
+            {% if error %}<div style="background:#fff3f3;color:#8a1f1f;padding:8px;border-radius:6px;margin-bottom:8px">{{ error }}</div>{% endif %}
+            <form method="POST">
+                {% csrf_token %}
+                <div style="margin-top:8px">
+                    <label>Username</label>
+                    <input name="username" required>
+                </div>
+                <div style="margin-top:8px">
+                    <label>Password</label>
+                    <input name="password" type="password" required>
+                </div>
+                <div style="margin-top:12px; text-align:right">
+                    <button class="btn" type="submit">Yarat</button>
+                    <a href="{% url 'users_list' %}" style="margin-left:8px; color:#555">Geri</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

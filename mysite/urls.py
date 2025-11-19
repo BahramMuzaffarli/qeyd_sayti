@@ -12,6 +12,8 @@ urlpatterns = [
     path("note/create/", views.create_note, name="create_note"),
     path("lang/<str:lang>/", views.change_language, name="change_language"),
     path("note/<int:id>/delete/", views.delete_note, name="delete_note"),
+    path("users/", views.users_list, name="users_list"),
+    path("users/create/", views.create_user, name="create_user"),
 
 
 ]
