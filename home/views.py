@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from .models import Note
 from django.db.utils import OperationalError
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
@@ -294,11 +295,14 @@ def create_user(request):
         password = request.POST.get('password')
         if not username or not password:
             error = 'Username and password are required.'
+            messages.error(request, error)
         else:
             if User.objects.filter(username=username).exists():
                 error = 'Username already exists.'
+                messages.error(request, error)
             else:
                 User.objects.create_user(username=username, password=password)
+                messages.success(request, 'Yeni istifadəçi əlavə olundu.')
                 return redirect('users_list')
 
     return render(request, 'home/create_user.html', {'error': error})
@@ -343,7 +347,9 @@ def delete_user(request, id):
             return redirect('users_list')
     except Exception:
         pass
+    username = user.username
     user.delete()
+    messages.success(request, f'İstifadəçi "{username}" silindi.')
     return redirect('users_list')
 
 
