@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QeydLab</title>
+    <!-- Favicon: inline SVG data URI as a safe default; if you add /static/home/note-icon.svg it can be used as well -->
+    <link rel="icon" href="data:image/svg+xml;utf8,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'><rect%20x='2'%20y='3'%20width='14'%20height='18'%20rx='2'%20fill='%23044f8a'/><path%20d='M16.5%203.5l4%204L10%2018l-4%201%201-4%2010.5-11.5z'%20fill='%23fff'/></svg>">
+    <link rel="icon" href="/static/home/note-icon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root{
+        --bg: #f5f6f8; /* light gray site background */
+            --box-bg: #fff;
+            --primary: #007BFF;
+            --muted: #666;
+            --radius: 12px;
+        }
+        body {
+            background-color: var(--bg);
+            font-family: Arial, sans-serif;
+            color: #222;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .box {
+            background: var(--box-bg);
+            width: 100%;
+            max-width: 900px;
+            border-radius: var(--radius);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+            padding: 22px;
+        }
+        .header {
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom: 16px;
+        }
+        h1 { margin:0; font-size:20px; color:#004080 }
+        .controls { display:flex; gap:10px; align-items:center }
+        select, input[type="text"] { padding:8px 10px; border-radius:8px; border:1px solid #ccc }
+    /* Buttons: anchors and buttons should look consistent and not be underlined */
+    .btn { background:var(--primary); color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:8px }
+    .btn.secondary { background:#6c757d; text-decoration:none }
+        table { width:100%; border-collapse:collapse; margin-top:12px }
+        th, td { padding:12px; border-bottom:1px solid #eee; text-align:left }
+        th { color:var(--muted); font-weight:600; }
+        .actions a { margin-right:8px; padding:6px 10px; border-radius:6px; text-decoration:none; color:#fff }
+        .actions .edit { background: #FD7E14 }
+        .actions .delete { background: #DC3545 }
+        @media (max-width:600px){
+            .header { flex-direction:column; align-items:flex-start; gap:10px }
+            .controls { width:100%; gap:6px }
+            select, input[type="text"]{ width:100% }
+        }
+    </style>
+</head>
+<body>
+    <div style="display:flex; gap:18px; width:100%;">
+    {% include 'home/sidebar.html' %}
+    <div class="main-with-sidebar">
+    <div class="box">
+    <div class="header">
+            <h1>{{ t.welcome }} {{ username }}!</h1>
+            <div class="controls">
+                <!-- single dropdown language selector -->
+                <div class="lang-dropdown" style="position:relative;">
+                    <button id="langBtn" class="btn secondary" type="button" style="display:flex; align-items:center; gap:8px;">
+                        <span id="langFlag">{% if lang == 'en' %}🇺🇸{% elif lang == 'ru' %}🇷🇺{% else %}🇦🇿{% endif %}</span>
+                        <span id="langCode">{{ lang|upper }}</span>
+                        <span style="font-size:12px; margin-left:6px;">▾</span>
+                    </button>
+                    <div id="langMenu" style="display:none; position:absolute; right:0; top:40px; background:#fff; color:#000; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.12); overflow:hidden; min-width:140px; z-index:50;">
+                        <button class="lang-item" data-lang="aze" style="width:100%; text-align:left; padding:10px; border:none; background:transparent; cursor:pointer">🇦🇿 Azərbaycan</button>
+                        <button class="lang-item" data-lang="en" style="width:100%; text-align:left; padding:10px; border:none; background:transparent; cursor:pointer">🇺🇸 English</button>
+                        <button class="lang-item" data-lang="ru" style="width:100%; text-align:left; padding:10px; border:none; background:transparent; cursor:pointer">🇷🇺 Русский</button>
+                    </div>
+                </div>
+
+                <a href="{% url 'create_note' %}" class="btn">{{ t.create }}</a>
+                <!-- User dropdown: Profile and Logout (press to open) -->
+                <div style="position:relative;">
+                    <button id="userBtn" class="btn secondary" type="button" style="display:flex; align-items:center; gap:8px;">
+                        <span style="display:inline-block; width:28px; height:28px; border-radius:50%; background:#fff; color:#044f8a; font-weight:700; display:flex; align-items:center; justify-content:center;">{{ username|default:'Q'|slice:":1"|upper }}</span>
+                        <span style="font-size:13px">{{ username }}</span>
+                        <span style="font-size:12px; margin-left:6px;">▾</span>
+                    </button>
+                    <div id="userMenu" style="display:none; position:absolute; right:0; top:46px; background:#fff; color:#000; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.12); overflow:hidden; min-width:160px; z-index:60;">
+                        <a href="{% url 'profile' %}" style="display:block; padding:10px; text-decoration:none; color:#333">Profil</a>
+                        <a href="{% url 'logout' %}" style="display:block; padding:10px; text-decoration:none; color:#333">{{ t.logout }}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form method="GET" style="margin-bottom:12px; display:flex; gap:8px; align-items:center;">
+            <select name="search_field">
+                <option value="first_name" {% if search_field == 'first_name' %}selected{% endif %}>{{ 'Ad' }}</option>
+                <option value="last_name" {% if search_field == 'last_name' %}selected{% endif %}>{{ 'Soyad' }}</option>
+                <option value="note" {% if search_field == 'note' %}selected{% endif %}>{{ 'Qeyd' }}</option>
+            </select>
+            <input type="text" name="q" placeholder="{{ t.search }}..." value="{% if q %}{{ q }}{% endif %}">
+            <button type="submit" class="btn">{{ t.search }}</button>
+            <a href="{% url 'welcome' %}" class="btn secondary" style="padding:8px 10px; text-decoration:none;">{{ t.clear }}</a>
+        </form>
+
+        {% if db_error %}
+            <div style="background:#fff3f3; color:#8a1f1f; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #f5c6cb">
+                <strong>Database error:</strong> {{ db_error }}
+                <div style="margin-top:8px">Bu səhifəni işlətmək üçün aşağıdakı əmrləri yerinə yetirin (layihə kökündə):</div>
+                <pre style="background:#fff; padding:8px; border-radius:6px; margin-top:8px">python manage.py makemigrations home
+python manage.py migrate</pre>
+            </div>
+        {% endif %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>{{ 'Ad' }}</th>
+                    <th>{{ 'Soyad' }}</th>
+                    <th>{{ 'Qeyd' }}</th>
+                    <th>Tarix</th>
+                    <th>{{ 'Əməliyyatlar' }}</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for note in notes %}
+                <tr>
+                    <td>{{ note.first_name }}</td>
+                    <td>{{ note.last_name }}</td>
+                    <td>{{ note.note }}</td>
+                    <td>{{ note.created_at|date:"Y-m-d H:i" }}</td>
+                    <td class="actions">
+                        <a href="{% url 'edit_note' note.id %}" class="edit">{{ t.edit }}</a>
+                        <a href="{% url 'delete_note' note.id %}" class="delete delete-link">{{ t.delete }}</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5" style="text-align:center; padding:18px; color:#666">{{ t.no_records }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <!-- Pagination controls -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; gap:12px; flex-wrap:wrap;">
+            <div style="display:flex; gap:6px; align-items:center;">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1&per_page={{ per_page }}{% if search_field %}&search_field={{ search_field }}{% endif %}{% if q %}&q={{ q }}{% endif %}" class="btn secondary">«</a>
+                    <a href="?page={{ page_obj.previous_page_number }}&per_page={{ per_page }}{% if search_field %}&search_field={{ search_field }}{% endif %}{% if q %}&q={{ q }}{% endif %}" class="btn secondary">‹</a>
+                {% else %}
+                    <span class="btn secondary" style="opacity:.4">«</span>
+                    <span class="btn secondary" style="opacity:.4">‹</span>
+                {% endif %}
+
+                {% for i in page_range_display %}
+                    {% if i == '...' %}
+                        <span style="padding:6px 8px; color:var(--muted)">…</span>
+                    {% else %}
+                        {% if i == page_obj.number %}
+                            <span class="btn" style="background:#e9f5ff; color:#004080; font-weight:700">{{ i }}</span>
+                        {% else %}
+                            <a href="?page={{ i }}&per_page={{ per_page }}{% if search_field %}&search_field={{ search_field }}{% endif %}{% if q %}&q={{ q }}{% endif %}" class="btn" style="background:#fff; color:#004080; border:1px solid #e6f0fb">{{ i }}</a>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&per_page={{ per_page }}{% if search_field %}&search_field={{ search_field }}{% endif %}{% if q %}&q={{ q }}{% endif %}" class="btn secondary">›</a>
+                    <a href="?page={{ paginator.num_pages }}&per_page={{ per_page }}{% if search_field %}&search_field={{ search_field }}{% endif %}{% if q %}&q={{ q }}{% endif %}" class="btn secondary">»</a>
+                {% else %}
+                    <span class="btn secondary" style="opacity:.4">›</span>
+                    <span class="btn secondary" style="opacity:.4">»</span>
+                {% endif %}
+            </div>
+
+            <div style="display:flex; gap:12px; align-items:center;">
+                <div>
+                    <label style="color:var(--muted); font-size:13px; margin-right:6px">Səhifə:</label>
+                    <input id="pageInput" type="number" min="1" max="{{ paginator.num_pages }}" value="{% if page_obj %}{{ page_obj.number }}{% else %}1{% endif %}" style="width:64px; padding:6px 8px; border-radius:6px; border:1px solid #ccc" aria-label="Səhifə nömrəsi">
+                    <!-- 'Get' button removed to keep UI compact; press Enter in the input to jump pages -->
+                </div>
+
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <!-- compact per-page selector (label hidden for a cleaner look) -->
+                    <select id="perPage" aria-label="Səhifədə göstəriləcək qeydlər" style="padding:6px 8px; border-radius:6px; border:1px solid #ccc">
+                        {% for opt in per_page_options %}
+                            <option value="{{ opt }}" {% if per_page == opt %}selected{% endif %}>{{ opt }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="color:var(--muted);">Cəmi: {{ total_count }}</div>
+            </div>
+        </div>
+
+        <script>
+            // pagination helpers: page jump and per-page change
+            (function(){
+                const pageInput = document.getElementById('pageInput');
+                const perPage = document.getElementById('perPage');
+                // search params from server
+                const SEARCH_FIELD = "{{ search_field|default:'' }}";
+                const Q = "{{ q|default:'' }}";
+                const MAX_PAGES = parseInt("{{ paginator.num_pages|default:'0' }}") || 1;
+                const DEFAULT_PER_PAGE = parseInt("{{ per_page|default:'10' }}") || 10;
+                function buildQuery(params){
+                    const qs = new URLSearchParams();
+                    if(params.page) qs.set('page', params.page);
+                    if(params.per_page) qs.set('per_page', params.per_page);
+                    if(SEARCH_FIELD) qs.set('search_field', SEARCH_FIELD);
+                    if(Q) qs.set('q', Q);
+                    return '?' + qs.toString();
+                }
+
+                // allow pressing Enter in the page input to jump to a page
+                if(pageInput){
+                    pageInput.addEventListener('keydown', function(e){
+                        if(e.key === 'Enter'){
+                            e.preventDefault();
+                            let p = parseInt(pageInput.value) || 1;
+                            if(p < 1) p = 1; if(p > MAX_PAGES) p = MAX_PAGES;
+                            window.location.href = buildQuery({page: p, per_page: DEFAULT_PER_PAGE});
+                        }
+                    });
+                }
+
+                if(perPage){
+                    perPage.addEventListener('change', function(){
+                        const v = parseInt(this.value);
+                        window.location.href = buildQuery({page: 1, per_page: v});
+                    });
+                }
+            })();
+        </script>
+        <!-- Delete confirmation modal -->
+        <div id="confirmModal" style="display:none; position:fixed; left:0; top:0; right:0; bottom:0; background:rgba(0,0,0,0.4); align-items:center; justify-content:center;">
+            <div style="background:#fff; color:#000; padding:18px; border-radius:8px; width:320px; text-align:center; box-shadow:0 6px 18px rgba(0,0,0,0.2);">
+                <div id="confirmText">{{ t.confirm_delete_title }}</div>
+                <div style="margin-top:14px; display:flex; gap:10px; justify-content:center;">
+                    <button id="confirmYes" class="btn" style="min-width:80px;">{{ t.yes }}</button>
+                    <button id="confirmNo" class="btn secondary" style="min-width:80px;">{{ t.no }}</button>
+                </div>
+            </div>
+        </div>
+
+        <form id="delete-form" method="POST" style="display:none;">
+            {% csrf_token %}
+        </form>
+
+        <script>
+            // Delete confirmation handling
+            document.addEventListener('DOMContentLoaded', function(){
+                const deleteLinks = document.querySelectorAll('.delete-link');
+                const modal = document.getElementById('confirmModal');
+                const yes = document.getElementById('confirmYes');
+                const no = document.getElementById('confirmNo');
+                const form = document.getElementById('delete-form');
+
+                let targetHref = null;
+
+                deleteLinks.forEach(function(a){
+                    a.addEventListener('click', function(e){
+                        e.preventDefault();
+                        targetHref = a.getAttribute('href');
+                        modal.style.display = 'flex';
+                    });
+                });
+
+                no.addEventListener('click', function(){ modal.style.display = 'none'; targetHref = null; });
+
+                yes.addEventListener('click', function(){
+                    if(!targetHref) return; 
+                    form.setAttribute('action', targetHref);
+                    form.submit();
+                });
+                // language dropdown handling
+                const langBtn = document.getElementById('langBtn');
+                const langMenu = document.getElementById('langMenu');
+                const langItems = document.querySelectorAll('.lang-item');
+                langBtn.addEventListener('click', function(e){
+                    e.stopPropagation();
+                    langMenu.style.display = (langMenu.style.display === 'flex') ? 'none' : 'flex';
+                    langMenu.style.flexDirection = 'column';
+                });
+
+                document.addEventListener('click', function(){ langMenu.style.display = 'none'; });
+
+                langItems.forEach(function(b){
+                    b.addEventListener('click', function(){
+                        const target = b.getAttribute('data-lang');
+                        // redirect to change_language with next=current location
+                        const next = encodeURIComponent(window.location.href);
+                        window.location.href = '/lang/' + target + '/?next=' + next;
+                    });
+                });
+
+                // user dropdown handling
+                const userBtn = document.getElementById('userBtn');
+                const userMenu = document.getElementById('userMenu');
+                if(userBtn){
+                    userBtn.addEventListener('click', function(e){
+                        e.stopPropagation();
+                        userMenu.style.display = (userMenu.style.display === 'flex') ? 'none' : 'flex';
+                        userMenu.style.flexDirection = 'column';
+                    });
+                }
+                document.addEventListener('click', function(){ if(userMenu) userMenu.style.display = 'none'; });
+            });
+        </script>
+    </div>
+    </div>
+    </div>
+</body>
+</html>

@@ -1,68 +1,205 @@
-{% extends 'home/base.html' %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QeydLab — Users</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { background:#f5f6f8; font-family:Arial; display:flex; justify-content:center; align-items:flex-start; padding:40px 20px }
+        .box { background:#fff; width:100%; max-width:900px; padding:20px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.12) }
+        label{ display:block; margin-top:8px; color:#333 }
+        input[type="text"], textarea { width:100%; padding:10px; margin-top:8px; border-radius:8px; border:1px solid #ccc }
+        .btn{ background:#007BFF; color:#fff; padding:10px 14px; border-radius:8px; border:none; cursor:pointer }
+        .back-link{ margin-left:10px; text-decoration:none; color:#555 }
+        table { width:100%; border-collapse:collapse; margin-top:12px }
+        th, td { padding:12px; border-bottom:1px solid #eee; text-align:left }
+        th { color:var(--muted); font-weight:600; }
+        .actions a { margin-right:8px; padding:6px 10px; border-radius:6px; text-decoration:none; color:#fff }
+        .actions .edit { background: #FD7E14 }
+        .actions .delete { background: #DC3545 }
 
-{% block title %}İstifadəçilər{% endblock %}
+        .confirm-modal {
+            display: none; /* Initially hidden */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+        }
 
-{% block content %}
-<div class="main-with-sidebar">
+        .confirm-modal.active {
+            display: flex;
+            opacity: 1;
+        }
 
-    <!-- Sidebar saxlanılır -->
+        .confirm-content {
+            background: linear-gradient(135deg, #f0f8ff, #e0f2f7);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease-out;
+            border: 1px solid #cceeff;
+        }
+
+        .confirm-modal.active .confirm-content {
+            transform: translateY(0);
+        }
+
+        .confirm-content h3 {
+            color: #007BFF;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        .confirm-content p {
+            color: #555;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .confirm-buttons {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .confirm-btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .confirm-btn.yes {
+            background-color: #DC3545;
+            color: white;
+        }
+
+        .confirm-btn.yes:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .confirm-btn.no {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .confirm-btn.no:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
     {% include 'home/sidebar.html' %}
+    <div class="main-with-sidebar">
+        <div class="box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0">Userlər</h2>
+                <a href="{% url 'create_user' %}" class="btn">Yeni user yarat</a>
+            </div>
 
-    <!-- Əvvəlki dizayn edən BOX hissəsi -->
-    <div class="box">
-        <div class="title-row">
-            <h2>Userlər</h2>
-            <a href="{% url 'create_user' %}" class="btn btn-success">Yeni user</a>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Rol</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td>{{ u.id }}</td>
+                        <td>{{ u.username }}</td>
+                        <td>{{ u.profile.get_role_display }}</td>
+                        <td>
+                            <a href="{% url 'edit_user' u.id %}" class="btn actions edit">Edit</a>
+                            <button class="btn actions delete user-delete-btn" data-user-id="{{ u.id }}" data-username="{{ u.username }}">Delete</button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4">Heç bir user yoxdur</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Staff?</th>
-                    <th>Active?</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for u in users %}
-                <tr>
-                    <td>{{ u.id }}</td>
-                    <td>{{ u.username }}</td>
-                    <td>{{ u.is_staff }}</td>
-                    <td>{{ u.is_active }}</td>
-                    <td>
-                        <a href="{% url 'edit_user' u.id %}" class="btn btn-success">Edit</a>
-                        <a href="{% url 'delete_user' u.id %}" class="btn btn-danger user-delete">Delete</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="5">Heç bir user yoxdur</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <!-- Delete üçün gizli form -->
-        <form id="user-delete-form" method="POST" style="display:none;">
-            {% csrf_token %}
-        </form>
     </div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const links = document.querySelectorAll('.user-delete');
-    const form = document.getElementById('user-delete-form');
+    <!-- Delete Confirmation Modal -->
+    <div class="confirm-modal" id="confirmDeleteUserModal">
+        <div class="confirm-content">
+            <h3 style="margin:0 0 12px 0; font-size:18px;">Silmək istədiyinizə əminsiniz?</h3>
+            <p style="margin:0; color:#666;" id="confirmDeleteUserText"></p>
+            <div class="confirm-buttons">
+                <button class="confirm-btn no" id="confirmDeleteUserNo">Yox</button>
+                <button class="confirm-btn yes" id="confirmDeleteUserYes">Bəli</button>
+            </div>
+        </div>
+    </div>
 
-    links.forEach(function(a) {
-        a.addEventListener('click', function(e) {
-            e.preventDefault();
-            if(!confirm("Silmək istədiyinizə əminsiniz?")) return;
-            form.action = a.getAttribute("href");
-            form.submit();
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const confirmModal = document.getElementById('confirmDeleteUserModal');
+            const confirmText = document.getElementById('confirmDeleteUserText');
+            const confirmYes = document.getElementById('confirmDeleteUserYes');
+            const confirmNo = document.getElementById('confirmDeleteUserNo');
+            let deleteUserId = null;
+
+            document.querySelectorAll('.user-delete-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    deleteUserId = this.getAttribute('data-user-id');
+                    const username = this.getAttribute('data-username');
+                    confirmText.textContent = 'İstifadəçi "' + username + '" silinsin?';
+                    confirmModal.classList.add('active');
+                });
+            });
+
+            confirmYes.addEventListener('click', function() {
+                if (deleteUserId) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/users/' + deleteUserId + '/delete/';
+                    
+                    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = 'csrfmiddlewaretoken';
+                    csrfInput.value = csrfToken;
+                    form.appendChild(csrfInput);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+
+            confirmNo.addEventListener('click', function() {
+                confirmModal.classList.remove('active');
+                deleteUserId = null;
+            });
+
+            confirmModal.addEventListener('click', function(e) {
+                if (e.target === confirmModal) {
+                    confirmModal.classList.remove('active');
+                    deleteUserId = null;
+                }
+            });
         });
-    });
-});
-</script>
-{% endblock %}
+    </script>
+</body>
+</html>

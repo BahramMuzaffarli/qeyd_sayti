@@ -25,7 +25,13 @@
                 <label style="margin-top:8px">New password (leave empty to keep)</label>
                 <input name="password" type="password">
 
-                <label style="margin-top:8px"><input type="checkbox" name="is_staff" {% if user_obj.is_staff %}checked{% endif %}> Is staff</label>
+                <label style="margin-top:8px">Rol</label>
+                <select name="role" class="form-control">
+                    <option value="patient" {% if user_obj.profile.role == 'patient' %}selected{% endif %}>Pasiyent</option>
+                    <option value="doctor" {% if user_obj.profile.role == 'doctor' %}selected{% endif %}>Həkim</option>
+                    <option value="staff" {% if user_obj.profile.role == 'staff' %}selected{% endif %}>Digər personal</option>
+                    <option value="admin" {% if user_obj.profile.role == 'admin' %}selected{% endif %}>Admin</option>
+                </select>
 
                 <div style="margin-top:12px; text-align:right">
                     <button class="btn" type="submit">Save</button>

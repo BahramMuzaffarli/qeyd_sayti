@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from .models import Note
+from .models import Note, Media, UserProfile
 from django.db.utils import OperationalError
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
 from django.contrib import messages
@@ -131,6 +131,174 @@ def welcome(request):
     username = request.session.get('username', 'Qonaq')
     lang = request.session.get('lang', 'aze')
     t = get_translations(lang)
+    return render(request, "home/blank_welcome.html", {'username': username, 'lang': lang, 't': t})
+
+# mövcud welcome view-in altında əlavə et
+def logout_view(request):
+    request.session.flush()  # sessiyanı təmizləyir
+    return redirect('login')  # əsas login səhifəsinə yönləndir
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Note
+
+def delete_note(request, id):
+    note = get_object_or_404(Note, id=id)
+    note.delete()
+    return redirect("welcome")
+
+
+def change_language(request, lang):
+    # simple session-based language switch
+    if lang in TRANSLATIONS:
+        request.session['lang'] = lang
+    # redirect back to the page the user was on (next param or referer)
+    next_url = request.GET.get('next') or request.META.get('HTTP_REFERER') or '/welcome/'
+    return redirect(next_url)
+
+
+def edit_note(request, id):
+    note = get_object_or_404(Note, id=id)
+    lang = request.session.get('lang', 'aze')
+    t = get_translations(lang)
+
+    if request.method == "POST":
+        note.first_name = request.POST.get("first_name")
+        note.last_name = request.POST.get("last_name")
+        note.note = request.POST.get("note")
+        note.save()
+        return redirect("welcome")
+
+    return render(request, "home/edit_note.html", {"note": note, 'lang': lang, 't': t})
+
+
+def create_note(request):
+    lang = request.session.get('lang', 'aze')
+    t = get_translations(lang)
+
+    if request.method == "POST":
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        note_text = request.POST.get('note')
+        if first_name and last_name and note_text:
+            Note.objects.create(first_name=first_name, last_name=last_name, note=note_text)
+            return redirect('welcome')
+
+    return render(request, "home/create_note.html", {'lang': lang, 't': t})
+
+
+def users_list(request):
+    User = get_user_model()
+    users = User.objects.select_related('profile').all().order_by('id')
+    return render(request, 'home/users.html', {'users': users})
+
+
+def create_user(request):
+    User = get_user_model()
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        if not username or not password:
+            error = 'Username and password are required.'
+            messages.error(request, error)
+        else:
+            if User.objects.filter(username=username).exists():
+                error = 'Username already exists.'
+                messages.error(request, error)
+            else:
+                user = User.objects.create_user(username=username, password=password)
+                role = request.POST.get('role', 'patient')
+                UserProfile.objects.create(user=user, role=role)
+                messages.success(request, 'Yeni istifadəçi əlavə olundu.')
+                return redirect('users_list')
+
+    return render(request, 'home/create_user.html', {'error': error})
+
+
+def edit_user(request, id):
+    User = get_user_model()
+    user = get_object_or_404(User, id=id)
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        role = request.POST.get('role')
+        # is_staff = True if request.POST.get('is_staff') == 'on' else False
+        if not username:
+            error = 'Username required.'
+        else:
+            # check uniqueness
+            if User.objects.exclude(id=user.id).filter(username=username).exists():
+                error = 'Username already taken.'
+            else:
+                user.username = username
+                # user.is_staff = is_staff # is_staff is now managed by role
+                if password:
+                    user.set_password(password)
+                user.save()
+                
+                # Update or create UserProfile
+                user_profile, created = UserProfile.objects.get_or_create(user=user)
+                user_profile.role = role
+                user_profile.save()
+
+                messages.success(request, f'İstifadəçi "{username}" məlumatları dəyişdirildi.')
+                return redirect('users_list')
+
+    return render(request, 'home/edit_user.html', {'user_obj': user, 'error': error})
+
+
+def delete_user(request, id):
+    from django.views.decorators.http import require_POST
+    # accept POST only
+    if request.method != 'POST':
+        return redirect('users_list')
+    User = get_user_model()
+    user = get_object_or_404(User, id=id)
+    # do not allow deleting superuser or self (basic safety)
+    try:
+        if request.user.is_authenticated and request.user.id == user.id:
+            # cannot delete self via UI
+            return redirect('users_list')
+    except Exception:
+        pass
+    username = user.username
+    user.delete()
+    messages.success(request, f'İstifadəçi "{username}" silindi.')
+    return redirect('users_list')
+
+
+@login_required
+def profile(request):
+    lang = request.session.get('lang', 'aze')
+    t = get_translations(lang)
+    user = request.user
+    message = None
+    if request.method == 'POST':
+        form = PasswordChangeForm(user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # important to keep the user logged in
+            message = 'Parol dəyişdirildi.'
+        else:
+            message = 'Xəta: zəhmət olmasa formu düzgün doldurun.'
+    else:
+        form = PasswordChangeForm(user)
+
+    return render(request, 'home/profile.html', {'user_obj': user, 'form': form, 'message': message, 'lang': lang, 't': t})
+
+
+def welcome(request):
+    username = request.session.get('username', 'Qonaq')
+    lang = request.session.get('lang', 'aze')
+    t = get_translations(lang)
+    return render(request, "home/blank_welcome.html", {'username': username, 'lang': lang, 't': t})
+
+
+def notes_list(request):
+    username = request.session.get('username', 'Qonaq')
+    lang = request.session.get('lang', 'aze')
+    t = get_translations(lang)
 
     # Search support: ?search_field=<first_name|last_name|note>&q=<query>
     search_field = request.GET.get('search_field')
@@ -166,7 +334,7 @@ def welcome(request):
             'total_count': 0,
             'db_error': str(e),
         }
-        return render(request, "home/welcome.html", context)
+        return render(request, "home/notes.html", context)
     allowed = ['first_name', 'last_name', 'note']
     if search_field in allowed and q:
         # case-insensitive contains search
@@ -226,148 +394,37 @@ def welcome(request):
 
     context['page_range_display'] = display
 
-    return render(request, "home/welcome.html", context)
-
-# mövcud welcome view-in altında əlavə et
-def logout_view(request):
-    request.session.flush()  # sessiyanı təmizləyir
-    return redirect('login')  # əsas login səhifəsinə yönləndir
-
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Note
-
-def delete_note(request, id):
-    note = get_object_or_404(Note, id=id)
-    note.delete()
-    return redirect("welcome")
+    return render(request, "home/notes.html", context)
 
 
-def change_language(request, lang):
-    # simple session-based language switch
-    if lang in TRANSLATIONS:
-        request.session['lang'] = lang
-    # redirect back to the page the user was on (next param or referer)
-    next_url = request.GET.get('next') or request.META.get('HTTP_REFERER') or '/welcome/'
-    return redirect(next_url)
-
-
-def edit_note(request, id):
-    note = get_object_or_404(Note, id=id)
+def menu_page(request):
     lang = request.session.get('lang', 'aze')
     t = get_translations(lang)
-
-    if request.method == "POST":
-        note.first_name = request.POST.get("first_name")
-        note.last_name = request.POST.get("last_name")
-        note.note = request.POST.get("note")
-        note.save()
-        return redirect("welcome")
-
-    return render(request, "home/edit_note.html", {"note": note, 'lang': lang, 't': t})
-
-
-def create_note(request):
-    lang = request.session.get('lang', 'aze')
-    t = get_translations(lang)
-
-    if request.method == "POST":
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        note_text = request.POST.get('note')
-        if first_name and last_name and note_text:
-            Note.objects.create(first_name=first_name, last_name=last_name, note=note_text)
-            return redirect('welcome')
-
-    return render(request, "home/create_note.html", {'lang': lang, 't': t})
+    username = request.session.get('username', 'Qonaq')
+    media_list = Media.objects.all().order_by('-uploaded_at')
+    
+    return render(request, 'home/menu.html', {
+        'username': username,
+        'media_list': media_list,
+        'lang': lang,
+        't': t
+    })
 
 
-def users_list(request):
-    User = get_user_model()
-    users = User.objects.all().order_by('id')
-    return render(request, 'home/users.html', {'users': users})
-
-
-def create_user(request):
-    User = get_user_model()
-    error = None
+def upload_media(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        if not username or not password:
-            error = 'Username and password are required.'
-            messages.error(request, error)
-        else:
-            if User.objects.filter(username=username).exists():
-                error = 'Username already exists.'
-                messages.error(request, error)
-            else:
-                User.objects.create_user(username=username, password=password)
-                messages.success(request, 'Yeni istifadəçi əlavə olundu.')
-                return redirect('users_list')
-
-    return render(request, 'home/create_user.html', {'error': error})
+        files = request.FILES.getlist('media_files')
+        for file in files:
+            Media.objects.create(file=file, title=file.name)
+        messages.success(request, f'{len(files)} media faylı uğurla əlavə olundu.')
+    return redirect('menu_page')
 
 
-def edit_user(request, id):
-    User = get_user_model()
-    user = get_object_or_404(User, id=id)
-    error = None
+def delete_media(request, id):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        is_staff = True if request.POST.get('is_staff') == 'on' else False
-        if not username:
-            error = 'Username required.'
-        else:
-            # check uniqueness
-            if User.objects.exclude(id=user.id).filter(username=username).exists():
-                error = 'Username already taken.'
-            else:
-                user.username = username
-                user.is_staff = is_staff
-                if password:
-                    user.set_password(password)
-                user.save()
-                return redirect('users_list')
-
-    return render(request, 'home/edit_user.html', {'user_obj': user, 'error': error})
-
-
-def delete_user(request, id):
-    from django.views.decorators.http import require_POST
-    # accept POST only
-    if request.method != 'POST':
-        return redirect('users_list')
-    User = get_user_model()
-    user = get_object_or_404(User, id=id)
-    # do not allow deleting superuser or self (basic safety)
-    try:
-        if request.user.is_authenticated and request.user.id == user.id:
-            # cannot delete self via UI
-            return redirect('users_list')
-    except Exception:
-        pass
-    username = user.username
-    user.delete()
-    messages.success(request, f'İstifadəçi "{username}" silindi.')
-    return redirect('users_list')
-
-
-@login_required
-def profile(request):
-    lang = request.session.get('lang', 'aze')
-    t = get_translations(lang)
-    user = request.user
-    message = None
-    if request.method == 'POST':
-        form = PasswordChangeForm(user, request.POST)
-        if form.is_valid():
-            user = form.save()
-            update_session_auth_hash(request, user)  # important to keep the user logged in
-            message = 'Parol dəyişdirildi.'
-        else:
-            message = 'Xəta: zəhmət olmasa formu düzgün doldurun.'
-    else:
-        form = PasswordChangeForm(user)
-
-    return render(request, 'home/profile.html', {'user_obj': user, 'form': form, 'message': message, 'lang': lang, 't': t})
+        media = get_object_or_404(Media, id=id)
+        media_name = media.title or media.file.name
+        media.file.delete()  # Faylı diskdən sil
+        media.delete()  # Database-dən sil
+        messages.success(request, f'Media "{media_name}" uğurla silindi.')
+    return redirect('menu_page')

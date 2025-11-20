@@ -12,17 +12,25 @@
         </a>
 
         <nav style="margin-top:8px; display:flex; flex-direction:column; gap:8px;">
+            <a href="{% url 'menu_page' %}" style="display:flex; align-items:center; padding:10px 12px; border-radius:8px; color:#eaf6ff; text-decoration:none; font-weight:700; background:transparent">Media</a>
+            
             <div>
                 <!-- Customers toggle (acts like Administrator) -->
-                <a href="#" id="customersToggleLink" style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:8px; color:#e8f6ff; font-weight:700; text-decoration:none; background:transparent">Müştərilər</a>
+                <a href="#" id="customersToggleLink" style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:8px; color:#e8f6ff; font-weight:700; text-decoration:none; background:transparent">
+                    <span>Müştərilər</span>
+                    <span id="customersAccordionIcon" style="font-size:12px; transition:transform 0.2s;">►</span>
+                </a>
                 <div id="customersMenu" style="display:none; margin-top:8px; display:flex; flex-direction:column; gap:6px; padding-left:6px;">
-                    <a href="{% url 'welcome' %}" style="padding:8px 10px; border-radius:8px; color:#dbeeff; text-decoration:none; background:transparent">Yaradılan qeydlər</a>
+                    <a href="{% url 'notes_list' %}" style="padding:8px 10px; border-radius:8px; color:#dbeeff; text-decoration:none; background:transparent">Yaradılan qeydlər</a>
                 </div>
             </div>
 
             <div>
                 <!-- Administrator section: keep toggle behavior but remove the triangle for a cleaner look -->
-                <a href="#" id="adminToggleLink" style="display:flex; align-items:center; padding:10px 12px; border-radius:8px; color:#eaf6ff; text-decoration:none; font-weight:700; background:transparent">Administrator</a>
+                <a href="#" id="adminToggleLink" style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:8px; color:#eaf6ff; text-decoration:none; font-weight:700; background:transparent">
+                    <span>Administrator</span>
+                    <span id="adminAccordionIcon" style="font-size:12px; transition:transform 0.2s;">►</span>
+                </a>
                 <div id="adminMenu" style="display:none; margin-top:8px; display:flex; flex-direction:column; gap:6px; padding-left:6px;">
                     <a href="{% url 'users_list' %}" style="padding:8px 10px; border-radius:8px; color:#dbeeff; text-decoration:none;">Userlər</a>
                 </div>
@@ -49,22 +57,31 @@
 <script>
     document.addEventListener('DOMContentLoaded', function(){
         const toggleLink = document.getElementById('adminToggleLink');
-        const menu = document.getElementById('adminMenu');
-        if(toggleLink && menu){
-            toggleLink.addEventListener('click', function(e){
-                e.preventDefault();
-                menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
-            });
-        }
+        const adminMenu = document.getElementById('adminMenu');
+        const adminIcon = document.getElementById('adminAccordionIcon');
 
-        // customers toggle (Müştərilər -> Yaradılan qeydlər)
         const customersToggle = document.getElementById('customersToggleLink');
         const customersMenu = document.getElementById('customersMenu');
-        if(customersToggle && customersMenu){
-            customersToggle.addEventListener('click', function(e){
-                e.preventDefault();
-                customersMenu.style.display = (customersMenu.style.display === 'flex') ? 'none' : 'flex';
-            });
+        const customersIcon = document.getElementById('customersAccordionIcon');
+
+        function setupAccordion(toggle, menu, icon) {
+            if (toggle && menu && icon) {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const isOpen = menu.style.display === 'flex';
+                    menu.style.display = isOpen ? 'none' : 'flex';
+                    icon.textContent = isOpen ? '►' : '▼';
+                });
+
+                // Open menu if a child link is active
+                if (menu.querySelector('a[href="' + window.location.pathname + '"]')) {
+                    menu.style.display = 'flex';
+                    icon.textContent = '▼';
+                }
+            }
         }
+
+        setupAccordion(adminToggleLink, adminMenu, adminIcon);
+        setupAccordion(customersToggleLink, customersMenu, customersIcon);
     });
 </script>
