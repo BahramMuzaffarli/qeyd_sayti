@@ -23,6 +23,12 @@ urlpatterns = [
     path("menu/", views.menu_page, name="menu_page"),
     path("menu/upload/", views.upload_media, name="upload_media"),
     path("menu/<int:id>/delete/", views.delete_media, name="delete_media"),
+    path('note/<int:id>/delete/', views.delete_note, name='delete_note'),
+    path("create_note/", views.create_note, name="create_note"),
+    path("edit_note/<int:id>/", views.edit_note, name="edit_note"),
+    path("delete_note/<int:id>/", views.delete_note, name="delete_note"),
+    path('admin/', admin.site.urls),
+
 ]
 
 # Serve media files during development

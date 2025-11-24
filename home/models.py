@@ -18,7 +18,23 @@ class Media(models.Model):
 
     def __str__(self):
         return self.title or self.file.name
+    
+class Note(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    note = models.TextField()  # əsas qeyd sahəsi
 
+    # Yeni sahələr
+    tani_bilgisi = models.TextField(blank=True, null=True)
+    sikayet = models.TextField(blank=True, null=True)
+    hikaye = models.TextField(blank=True, null=True)
+    ozgecmis = models.TextField(blank=True, null=True)
+    fizik_muayene = models.TextField(blank=True, null=True)
+    bulgular = models.TextField(blank=True, null=True)
+    tedavi = models.TextField(blank=True, null=True)
+    oneriler = models.TextField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class UserProfile(models.Model):
     ROLE_CHOICES = [
@@ -41,3 +57,7 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} ({self.get_role_display()})"
+    
+
+
+    

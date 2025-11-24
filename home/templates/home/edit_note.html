@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>QeydLab</title>
+    <title>QeydLab - Qeyd Düzəliş</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
     body { background:#f5f6f8; font-family:Arial; display:flex; justify-content:center; align-items:flex-start; padding:40px 20px }
         .box { background:#fff; width:100%; max-width:520px; padding:20px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.12) }
-        label{ display:block; margin-top:8px; color:#333 }
+        label{ display:block; margin-top:8px; color:#333; font-weight:500 }
         input[type="text"], textarea { width:100%; padding:10px; margin-top:8px; border-radius:8px; border:1px solid #ccc }
+        textarea { resize: vertical; min-height:60px }
+        .section-title { margin-top:20px; font-size:1.1em; font-weight:700; color:#007BFF; border-bottom:1px solid #e0e0e0; padding-bottom:4px; }
         .btn{ background:#007BFF; color:#fff; padding:10px 14px; border-radius:8px; border:none; cursor:pointer }
-        .back-link{ margin-left:10px; text-decoration:none; color:#555 }
+        .back-link{ margin-left:10px; text-decoration:none; color:#555; font-weight:500 }
     </style>
 </head>
 <body>
@@ -43,6 +45,33 @@
 
             <label>Qeyd</label>
             <textarea name="note" rows="6" required>{{ note.note }}</textarea>
+
+            <!-- Yeni sahələr əlavə olunur -->
+            <div class="section-title">Muayene Bilgileri</div>
+
+            <label>Tanı Bilgisi</label>
+            <textarea name="tani_bilgisi">{{ note.tani_bilgisi }}</textarea>
+
+            <label>Şikayet</label>
+            <textarea name="sikayet">{{ note.sikayet }}</textarea>
+
+            <label>Hikaye</label>
+            <textarea name="hikaye">{{ note.hikaye }}</textarea>
+
+            <label>Özgeçmiş</label>
+            <textarea name="ozgecmis">{{ note.ozgecmis }}</textarea>
+
+            <label>Fizik Muayene</label>
+            <textarea name="fizik_muayene">{{ note.fizik_muayene }}</textarea>
+
+            <label>Bulgular</label>
+            <textarea name="bulgular">{{ note.bulgular }}</textarea>
+
+            <label>Tedavi</label>
+            <textarea name="tedavi">{{ note.tedavi }}</textarea>
+
+            <label>Öneriler / Not</label>
+            <textarea name="oneriler">{{ note.oneriler }}</textarea>
 
             <div style="text-align:right; margin-top:12px;">
                 <button type="submit" class="btn">{{ t.edit }}</button>

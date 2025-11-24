@@ -166,10 +166,20 @@ def edit_note(request, id):
         note.last_name = request.POST.get("last_name")
         note.note = request.POST.get("note")
         note.save()
-        return redirect("welcome")
+        return redirect("notes")
 
     return render(request, "home/edit_note.html", {"note": note, 'lang': lang, 't': t})
 
+def delete_note(request, id):
+    note = get_object_or_404(Note, id=id)
+    lang = request.session.get('lang', 'aze')
+    t = get_translations(lang)
+
+    if request.method == "POST":
+        note.delete()
+        return redirect("welcome")  # və ya list səhifənə yönləndir
+
+    return render(request, "home/delete_note.html", {"note": note, "lang": lang, "t": t})
 
 def create_note(request):
     lang = request.session.get('lang', 'aze')
